@@ -11,6 +11,8 @@ Claude Code / OpenCode 懶人包系列教材與實作範例。
 ```
 D:\opencode0524\
 ├── AGENTS.md          # 本檔案：專案說明與開發指引
+├── README.md          # 專案說明與使用方式
+├── LICENSE.txt        # MIT 授權
 ├── .gitignore
 ├── 00-環境建置.md
 ├── 01-連接-NotebookLM.md
@@ -29,6 +31,8 @@ D:\opencode0524\
 | 本地檔案 | GitHub | Obsidian | 備註 |
 |---------|--------|----------|------|
 | AGENTS.md | ✅ | ✅ | 專案根目錄 |
+| README.md | ❌ | ❌ | 專案說明與使用方式 |
+| LICENSE.txt | ❌ | ❌ | MIT 授權 |
 | .gitignore | ✅ | ✅ | |
 | 00-環境建置.md | ❌ | ❌ | |
 | 01-連接-NotebookLM.md | ❌ | ❌ | |
