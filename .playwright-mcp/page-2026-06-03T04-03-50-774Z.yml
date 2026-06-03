@@ -1,0 +1,56 @@
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e6]:
+        - generic [ref=e7]: 載入中
+        - progressbar [ref=e8]
+      - main [ref=e15]:
+        - generic [ref=e16]:
+          - generic [ref=e18]:
+            - generic [ref=e19]:
+              - img [ref=e21]
+              - generic [ref=e26]: 使用 Google 帳戶登入
+            - img "Firebase CLI" [ref=e27]
+          - generic [ref=e28]:
+            - heading "登入" [level=1] [ref=e29]
+            - generic [ref=e31]:
+              - text: 繼續使用「
+              - button "Firebase CLI" [ref=e32] [cursor=pointer]
+              - text: 」
+        - generic [ref=e35]:
+          - generic [ref=e40]:
+            - generic [ref=e45]:
+              - textbox "電子郵件地址或電話號碼" [active] [ref=e46]
+              - generic: 電子郵件地址或電話號碼
+            - button "忘記電子郵件地址？" [ref=e50] [cursor=pointer]
+          - generic [ref=e53]:
+            - text: 使用前，請先詳閱「Firebase CLI」的《
+            - link "隱私權政策" [ref=e54] [cursor=pointer]:
+              - /url: https://policies.google.com/privacy
+            - text: 》及《
+            - link "服務條款" [ref=e55] [cursor=pointer]:
+              - /url: https://firebase.google.com/terms
+            - text: 》。
+        - generic [ref=e57]:
+          - button "下一步" [ref=e61]:
+            - generic [ref=e64]: 下一步
+          - button "建立帳戶" [ref=e69]:
+            - generic [ref=e72]: 建立帳戶
+    - contentinfo [ref=e76]:
+      - combobox "變更語言 繁體中文" [ref=e80] [cursor=pointer]:
+        - generic:
+          - generic: 繁體中文
+        - generic:
+          - img
+      - list [ref=e82]:
+        - listitem [ref=e83]:
+          - link "說明" [ref=e84] [cursor=pointer]:
+            - /url: https://support.google.com/accounts?hl=zh-TW&p=account_iph
+        - listitem [ref=e85]:
+          - link "隱私權設定" [ref=e86] [cursor=pointer]:
+            - /url: https://accounts.google.com/TOS?loc=TW&hl=zh-TW&privacy=true
+        - listitem [ref=e87]:
+          - link "條款" [ref=e88] [cursor=pointer]:
+            - /url: https://accounts.google.com/TOS?loc=TW&hl=zh-TW
+  - iframe [ref=e89]:
+    

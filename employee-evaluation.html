@@ -57,6 +57,7 @@ td:first-child { text-align: left; font-weight: 600; }
 .toast-error { background: #c62828; }
 .toast-info { background: #1565c0; }
 @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes spin { to { transform: rotate(360deg); } }
 .summary-card { background: #e8eaf6; border-radius: 8px; padding: 16px; margin: 12px 0; }
 .summary-stat { display: inline-block; margin: 4px 16px 4px 0; }
 .summary-stat strong { color: #1a237e; }
@@ -192,10 +193,9 @@ input[type="password"]:focus { outline: none; border-color: #1a237e; }
 <p>評分者：<strong id="confirmRater"></strong></p>
 <div id="confirmContent"></div>
 <div style="margin-top:16px;padding:16px;background:#fff8e1;border-radius:8px;border-left:4px solid #f9a825;">
-  <strong>下一步說明：</strong><br>
-  1. 點擊「確認送出」→ 系統會產生您的評分資料<br>
-  2. 您可以選擇「下載檔案」或「複製資料」傳送給管理員<br>
-  3. 可透過 LINE、Email 或隨身碟將檔案/資料交給管理員
+  <strong>送出後：</strong><br>
+  評分資料會自動上傳到雲端，管理員即可查看統計結果。
+  點擊下方「確認送出」完成評分。
 </div>
 </div>
 <div class="btn-group">
@@ -204,31 +204,36 @@ input[type="password"]:focus { outline: none; border-color: #1a237e; }
 </div>
 </div>
 
-<!-- Step 4: Thank you & delivery -->
+<!-- Step 4: Thank you -->
 <div class="step" id="step4">
 <div class="card" style="text-align:center;padding:40px;">
   <div style="font-size:4em;margin-bottom:16px;">&#9989;</div>
-  <h2 style="color:#2e7d32;">評分完成！</h2>
-  <p style="color:#666;margin:8px 0;">請選擇一種方式將評分資料交給管理員：</p>
+  <h2 style="color:#2e7d32;" id="step4Title">評分上傳中...</h2>
+  <p id="step4Msg" style="color:#666;margin:8px 0;">正在將評分資料上傳到雲端，請稍候...</p>
 
-  <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin:24px 0;">
-    <button class="btn btn-primary" id="downloadAgain" style="display:inline-flex;align-items:center;gap:6px;">
-      &#128229; 下載評分檔案
-    </button>
-    <button class="btn btn-success" id="copyDataBtn" style="display:inline-flex;align-items:center;gap:6px;">
-      &#128203; 複製評分資料
-    </button>
+  <div id="step4Spinner" style="margin:24px 0;">
+    <div style="width:48px;height:48px;border:4px solid #e0e0e0;border-top:4px solid #1a237e;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto;"></div>
   </div>
 
-  <div id="copyResult" style="color:#2e7d32;font-weight:700;margin:8px 0;display:none;">已複製到剪貼簿！請貼到 LINE/Email 傳送</div>
+  <div id="step4Done" style="display:none;">
+    <p style="color:#2e7d32;font-weight:700;margin:12px 0;font-size:1.1em;">已上傳到雲端！</p>
+    <p style="color:#666;margin:8px 0;">管理員現在可以直接查看統計結果</p>
+  </div>
 
-  <details style="margin:16px auto;max-width:600px;text-align:left;">
-    <summary style="cursor:pointer;color:#666;font-size:.9em;">點此查看評分原始資料（手動複製用）</summary>
-    <textarea id="jsonDataText" style="width:100%;height:200px;margin-top:8px;padding:8px;border:1px solid #e0e0e0;border-radius:6px;font-size:.8em;font-family:monospace;white-space:pre;overflow:auto;" readonly></textarea>
-  </details>
+  <div id="step4Error" style="display:none;margin:12px 0;">
+    <p style="color:#c62828;font-weight:700;">上傳失敗，請下載檔案後交給管理員</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:16px 0;">
+      <button class="btn btn-primary" id="downloadAgain" style="display:inline-flex;align-items:center;gap:6px;">&#128229; 下載評分檔案</button>
+      <button class="btn btn-success" id="copyDataBtn" style="display:inline-flex;align-items:center;gap:6px;">&#128203; 複製評分資料</button>
+    </div>
+    <div id="copyResult" style="color:#2e7d32;font-weight:700;margin:8px 0;display:none;">已複製！請貼到 LINE/Email 傳送</div>
+    <details style="margin:8px auto;max-width:600px;text-align:left;">
+      <summary style="cursor:pointer;color:#999;font-size:.85em;">點此查看原始資料</summary>
+      <textarea id="jsonDataText" style="width:100%;height:150px;margin-top:4px;padding:8px;border:1px solid #e0e0e0;border-radius:6px;font-size:.8em;font-family:monospace;white-space:pre;overflow:auto;" readonly></textarea>
+    </details>
+  </div>
 
   <p style="color:#999;font-size:.9em;margin-top:12px;">檔案名稱：<span id="raterFileName" style="color:#1a237e;font-weight:700;"></span></p>
-  <p style="color:#999;font-size:.85em;">管理員收到後，會在管理系統匯入即可顯示統計結果</p>
 
   <div class="btn-group" style="margin-top:16px;">
     <button class="btn btn-secondary" onclick="backToEntry()">返回首頁</button>
@@ -272,6 +277,10 @@ input[type="password"]:focus { outline: none; border-color: #1a237e; }
 // ====== CONFIG ======
 const ADMIN_PASSWORD = 'admin2026';
 const STORAGE_KEY = 'eval202603_admin';
+const GITHUB_OWNER = 'geogo141-design';
+const GITHUB_REPO = 'opencode-course';
+const GITHUB_PATH = 'data/evaluations.json';
+const GITHUB_TOKEN = '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';
 
 // ====== DATA ======
 const CADRES = ['田重修', '彭群瀞', '林政賢', '徐文材', '許志成', '徐幸良', '鍾國華', '林佑樽'];
@@ -311,12 +320,13 @@ function enterAdminMode() {
   document.getElementById('adminError').style.display = 'none';
 }
 
-function adminLogin() {
+async function adminLogin() {
   const pwd = document.getElementById('adminPwd').value;
   if (pwd === ADMIN_PASSWORD) {
     document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
     document.getElementById('adminResults').classList.add('active');
-    buildAdminResults();
+    document.getElementById('adminResultsArea').innerHTML = '<p style="text-align:center;color:#999;padding:20px;">正在載入雲端資料...</p>';
+    await buildAdminResults();
   } else {
     document.getElementById('adminError').style.display = 'block';
   }
@@ -483,6 +493,49 @@ function checkRatingComplete() {
   document.getElementById('toStep3').disabled = (done !== total);
 }
 
+// ====== CLOUD API (GitHub) ======
+function toBase64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary);
+}
+
+async function getCloudEvals() {
+  const url = 'https://raw.githubusercontent.com/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/main/' + GITHUB_PATH + '?_=' + Date.now();
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return {};
+    return (await res.json()).evaluations || {};
+  } catch(e) { return {}; }
+}
+
+async function pushToCloud(raterName, data) {
+  const apiUrl = 'https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + GITHUB_PATH;
+  const headers = { 'Authorization': 'Bearer ' + GITHUB_TOKEN, 'Accept': 'application/vnd.github.v3+json' };
+  const infoRes = await fetch(apiUrl, { headers });
+  if (!infoRes.ok) throw new Error('無法讀取雲端資料 (HTTP ' + infoRes.status + ')');
+  const info = await infoRes.json();
+  const contentRes = await fetch(info.download_url);
+  const current = await contentRes.json();
+  current.evaluations[raterName] = data;
+  current.evaluations[raterName]._submittedAt = new Date().toISOString();
+  const content = toBase64(JSON.stringify(current, null, 2));
+  const putRes = await fetch(apiUrl, {
+    method: 'PUT',
+    headers: headers,
+    body: JSON.stringify({ message: '評分：' + raterName, content: content, sha: info.sha })
+  });
+  if (!putRes.ok) throw new Error('上傳失敗 (HTTP ' + putRes.status + ')');
+}
+
+async function getAllEvals() {
+  const local = loadAdminData();
+  const cloud = await getCloudEvals();
+  for (const name in cloud) { if (!local[name]) local[name] = cloud[name]; }
+  return local;
+}
+
 // ====== CONFIRMATION ======
 function buildConfirmation() {
   document.getElementById('confirmRater').textContent = currentRater;
@@ -523,12 +576,45 @@ function buildConfirmation() {
   area.innerHTML = html;
 }
 
-// ====== SUBMIT (download JSON) ======
+// ====== SUBMIT (cloud upload) ======
 let lastSubmittedData = null;
 let lastSubmittedJSON = '';
 let lastSubmittedFilename = '';
 
-document.getElementById('submitRatings').addEventListener('click', () => {
+function showStep4Uploading() {
+  document.getElementById('step4Title').textContent = '評分上傳中...';
+  document.getElementById('step4Msg').textContent = '正在將評分資料上傳到雲端，請稍候...';
+  document.getElementById('step4Spinner').style.display = 'block';
+  document.getElementById('step4Done').style.display = 'none';
+  document.getElementById('step4Error').style.display = 'none';
+}
+
+function showStep4Success() {
+  document.getElementById('step4Title').textContent = '評分完成！';
+  document.getElementById('step4Msg').textContent = '您的評分已自動上傳到雲端';
+  document.getElementById('step4Spinner').style.display = 'none';
+  document.getElementById('step4Done').style.display = 'block';
+  document.getElementById('step4Error').style.display = 'none';
+}
+
+function showStep4Error() {
+  document.getElementById('step4Title').textContent = '上傳失敗';
+  document.getElementById('step4Msg').textContent = '無法連接到雲端，請下載檔案後交給管理員';
+  document.getElementById('step4Spinner').style.display = 'none';
+  document.getElementById('step4Done').style.display = 'none';
+  document.getElementById('step4Error').style.display = 'block';
+}
+
+function downloadJSON() {
+  if (!lastSubmittedJSON) return;
+  const blob = new Blob([lastSubmittedJSON], { type: 'application/json' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = lastSubmittedFilename;
+  link.click();
+}
+
+document.getElementById('submitRatings').addEventListener('click', async () => {
   if (!currentRater) return;
   lastSubmittedData = {
     rater: currentRater,
@@ -538,7 +624,6 @@ document.getElementById('submitRatings').addEventListener('click', () => {
   lastSubmittedJSON = JSON.stringify(lastSubmittedData, null, 2);
   lastSubmittedFilename = '互評_' + currentRater + '_' + new Date().toISOString().slice(0,10) + '.json';
 
-  // Fill in thank-you page
   document.getElementById('raterFileName').textContent = lastSubmittedFilename;
   document.getElementById('jsonDataText').value = lastSubmittedJSON;
   document.getElementById('copyResult').style.display = 'none';
@@ -549,30 +634,30 @@ document.getElementById('submitRatings').addEventListener('click', () => {
 
   document.querySelector(`.selector-item[data-name="${currentRater}"]`).classList.add('submitted-item');
   document.querySelector(`.selector-item[data-name="${currentRater}"]`).title = '已送出評分';
-  showToast('評分完成！請選擇方式傳送給管理員');
+
+  showStep4Uploading();
+
+  try {
+    await pushToCloud(currentRater, lastSubmittedData);
+    showStep4Success();
+    showToast('評分已上傳到雲端！');
+  } catch(e) {
+    showStep4Error();
+    showToast('上傳失敗，請下載檔案', 'error');
+  }
 });
 
-// Download button (re-download)
 document.getElementById('downloadAgain').addEventListener('click', () => {
-  if (!lastSubmittedJSON) return;
-  const blob = new Blob([lastSubmittedJSON], { type: 'application/json' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = lastSubmittedFilename;
-  link.click();
+  downloadJSON();
   showToast('檔案已下載：' + lastSubmittedFilename);
 });
 
-// Copy to clipboard
 document.getElementById('copyDataBtn').addEventListener('click', async () => {
   try {
     await navigator.clipboard.writeText(lastSubmittedJSON);
     document.getElementById('copyResult').style.display = 'block';
     showToast('已複製到剪貼簿！');
   } catch(e) {
-    // Fallback: expand and select textarea
-    const details = document.querySelector('#step4 details');
-    if (details) details.open = true;
     const ta = document.getElementById('jsonDataText');
     ta.select();
     document.execCommand('copy');
@@ -591,18 +676,18 @@ function saveAdminData(data) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
-function clearImported() {
+async function clearImported() {
   if (!confirm('確定清除所有匯入的評分資料？')) return;
   localStorage.removeItem(STORAGE_KEY);
   document.getElementById('fileList').innerHTML = '';
-  buildAdminResults();
+  await buildAdminResults();
   showToast('已清除所有資料');
 }
 
-function handleFiles(files) {
+async function handleFiles(files) {
   Array.from(files).forEach(file => {
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = async function(e) {
       try {
         const data = JSON.parse(e.target.result);
         if (!data.rater || !data.ratings) {
@@ -614,7 +699,7 @@ function handleFiles(files) {
         stored[data.rater]._importedAt = new Date().toISOString();
         saveAdminData(stored);
         showToast('已匯入 ' + data.rater + ' 的評分');
-        buildAdminResults();
+        await buildAdminResults();
         updateFileList();
       } catch(err) {
         showToast(file.name + ' 解析失敗：' + err.message, 'error');
@@ -645,18 +730,21 @@ function updateFileList() {
 }
 
 // ====== ADMIN RESULTS ======
-function buildAdminResults() {
-  const all = loadAdminData();
+async function buildAdminResults() {
+  const all = await getAllEvals();
   updateFileList();
   const area = document.getElementById('adminResultsArea');
+  const cloudCount = Object.keys(await getCloudEvals()).length;
+  const localCount = Object.keys(loadAdminData()).length;
   const raterCount = Object.keys(all).length;
   let html = '';
 
+  if (cloudCount > 0) {
+    html += '<div class="card"><h2>雲端同步狀態</h2><p style="color:#2e7d32;">雲端已有 <strong>' + cloudCount + '</strong> 人送出評分</p></div>';
+  }
+
   html += '<div class="card"><h2>完成進度</h2><div style="display:flex;flex-wrap:wrap;gap:6px;">';
   ALL_RATERS.forEach(name => {
-    if (all[name]) {
-      const t = all[name].submittedAt ? new Date(all[name].submittedAt).toLocaleString('zh-TW') : '';
-      html += `<span class="summary-stat" style="background:#e8f5e9;padding:4px 12px;border-radius:4px;"><strong>${name}</strong> ✅ ${t}</span>`;
     } else {
       html += `<span class="summary-stat" style="background:#fce4ec;padding:4px 12px;border-radius:4px;"><strong>${name}</strong> ⏳ 未評</span>`;
     }
