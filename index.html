@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026年3月份員工互評</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif; background: #f0f2f5; color: #333; }
+.container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+h1 { text-align: center; color: #1a237e; margin: 20px 0; font-size: 1.8em; }
+.card { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,.1); padding: 24px; margin-bottom: 20px; }
+.card h2 { color: #1a237e; margin-bottom: 16px; border-bottom: 2px solid #e8eaf6; padding-bottom: 10px; }
+.card h3 { color: #283593; margin: 16px 0 12px; }
+.step { display: none; }
+.step.active { display: block; }
+.btn { display: inline-block; padding: 10px 28px; border-radius: 8px; border: none; cursor: pointer; font-size: 1em; font-weight: 700; transition: all .2s; }
+.btn-primary { background: #1a237e; color: #fff; }
+.btn-primary:hover { background: #283593; }
+.btn-primary:disabled { background: #9fa8da; cursor: not-allowed; }
+.btn-success { background: #2e7d32; color: #fff; }
+.btn-success:hover { background: #388e3c; }
+.btn-secondary { background: #757575; color: #fff; margin-right: 8px; }
+.btn-secondary:hover { background: #616161; }
+.btn-danger { background: #c62828; color: #fff; }
+.btn-danger:hover { background: #d32f2f; }
+.btn-admin { background: #e65100; color: #fff; }
+.btn-admin:hover { background: #ef6c00; }
+.btn-group { margin-top: 20px; text-align: center; }
+.selector-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.selector-item { padding: 14px 10px; border: 2px solid #e0e0e0; border-radius: 8px; text-align: center; cursor: pointer; transition: all .2s; background: #fafafa; font-size: .95em; }
+.selector-item:hover { border-color: #7986cb; background: #e8eaf6; }
+.selector-item.selected { border-color: #1a237e; background: #c5cae9; font-weight: 700; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+th, td { padding: 8px 10px; text-align: center; border: 1px solid #e0e0e0; font-size: .9em; }
+th { background: #e8eaf6; color: #1a237e; font-weight: 700; }
+th:first-child { text-align: left; min-width: 80px; }
+td:first-child { text-align: left; font-weight: 600; }
+.rating-group { display: flex; gap: 4px; justify-content: center; }
+.rating-btn { width: 36px; height: 36px; border-radius: 50%; border: 2px solid #e0e0e0; background: #fff; cursor: pointer; font-weight: 700; font-size: .9em; transition: all .15s; }
+.rating-btn:hover { border-color: #7986cb; background: #e8eaf6; }
+.rating-btn.selected-1 { border-color: #c62828; background: #ffcdd2; color: #c62828; }
+.rating-btn.selected-2 { border-color: #e65100; background: #ffe0b2; color: #e65100; }
+.rating-btn.selected-3 { border-color: #f9a825; background: #fff9c4; color: #f9a825; }
+.rating-btn.selected-4 { border-color: #558b2f; background: #dcedc8; color: #558b2f; }
+.rating-btn.selected-5 { border-color: #1b5e20; background: #c8e6c9; color: #1b5e20; }
+.progress-bar { display: flex; justify-content: center; gap: 8px; margin: 20px 0; }
+.progress-step { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1em; background: #e0e0e0; color: #999; transition: all .3s; }
+.progress-step.active { background: #1a237e; color: #fff; }
+.progress-step.done { background: #2e7d32; color: #fff; }
+.progress-label { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; }
+.progress-label span { width: 40px; text-align: center; font-size: .7em; color: #999; }
+.progress-label span.active { color: #1a237e; font-weight: 700; }
+.progress-label span.done { color: #2e7d32; font-weight: 700; }
+.toast { position: fixed; top: 20px; right: 20px; padding: 14px 24px; border-radius: 8px; color: #fff; font-weight: 700; z-index: 9999; animation: slideIn .3s ease; }
+.toast-success { background: #2e7d32; }
+.toast-error { background: #c62828; }
+.toast-info { background: #1565c0; }
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+.summary-card { background: #e8eaf6; border-radius: 8px; padding: 16px; margin: 12px 0; }
+.summary-stat { display: inline-block; margin: 4px 16px 4px 0; }
+.summary-stat strong { color: #1a237e; }
+.self-highlight { background: #fff3e0; }
+.no-rate { color: #bdbdbd; font-style: italic; }
+input[type="password"], input[type="file"] { padding: 8px 12px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 1em; }
+input[type="password"]:focus { outline: none; border-color: #1a237e; }
+.submitted-item { opacity: .5; pointer-events: none; }
+.footer { text-align: center; color: #999; padding: 20px; font-size: .85em; }
+.entry-grid { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin: 40px 0; }
+.entry-card { width: 260px; padding: 40px 20px; border: 3px solid #e0e0e0; border-radius: 16px; text-align: center; cursor: pointer; transition: all .2s; background: #fff; }
+.entry-card:hover { border-color: #1a237e; box-shadow: 0 4px 20px rgba(0,0,0,.1); }
+.entry-card .icon { font-size: 3em; margin-bottom: 12px; }
+.entry-card .label { font-size: 1.2em; font-weight: 700; color: #1a237e; }
+.upload-area { border: 3px dashed #bdbdbd; border-radius: 12px; padding: 40px; text-align: center; cursor: pointer; transition: all .2s; margin: 16px 0; }
+.upload-area:hover { border-color: #1a237e; background: #e8eaf6; }
+.upload-area.dragover { border-color: #1a237e; background: #c5cae9; }
+.file-list { margin: 12px 0; }
+.file-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: #f5f5f5; border-radius: 6px; margin: 4px 0; }
+@media (max-width: 768px) {
+  .container { padding: 10px; }
+  .card { padding: 16px; }
+  table { font-size: .8em; }
+  th, td { padding: 4px 6px; }
+  .rating-btn { width: 30px; height: 30px; font-size: .8em; }
+  .selector-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+  .entry-card { width: 200px; padding: 24px 16px; }
+}
+@media print { .btn-group, .progress-bar, .progress-label, .entry-grid { display: none; } }
+</style>
+</head>
+<body>
+<div id="toast-container"></div>
+<div class="container">
+<h1>2026年3月份員工互評</h1>
+
+<!-- Entry page -->
+<div class="step active" id="entryPage">
+<div class="entry-grid">
+  <div class="entry-card" onclick="enterRaterMode()">
+    <div class="icon">&#9997;</div>
+    <div class="label">員工評分</div>
+    <p style="color:#666;margin-top:8px;font-size:.9em;">填寫互評問卷</p>
+  </div>
+  <div class="entry-card" onclick="enterAdminMode()">
+    <div class="icon">&#128274;</div>
+    <div class="label">管理員結果</div>
+    <p style="color:#666;margin-top:8px;font-size:.9em;">檢視彙整統計</p>
+  </div>
+</div>
+<div class="footer">2026年3月份員工互評系統</div>
+</div>
+
+<!-- Admin login -->
+<div class="step" id="adminLogin">
+<div class="card" style="max-width:400px;margin:40px auto;">
+<h2>管理員驗證</h2>
+<p style="margin-bottom:12px;color:#666;">請輸入管理員密碼以檢視評分結果：</p>
+<input type="password" id="adminPwd" placeholder="請輸入管理員密碼" style="width:100%;padding:12px;font-size:1.1em;border:2px solid #e0e0e0;border-radius:8px;" onkeydown="if(event.key==='Enter')adminLogin()">
+<div class="btn-group">
+  <button class="btn btn-secondary" onclick="backToEntry()">返回</button>
+  <button class="btn btn-admin" onclick="adminLogin()">進入管理員</button>
+</div>
+<p id="adminError" style="color:#c62828;margin-top:8px;display:none;">密碼錯誤，請重試</p>
+</div>
+</div>
+
+<!-- Progress (only for rater mode) -->
+<div id="progressArea" style="display:none;">
+<div class="progress-bar">
+  <div class="progress-step active" data-step="1">1</div>
+  <div class="progress-step" data-step="2">2</div>
+  <div class="progress-step" data-step="3">3</div>
+</div>
+<div class="progress-label">
+  <span class="active">選擇評分者</span>
+  <span>評分</span>
+  <span>確認</span>
+</div>
+</div>
+
+<!-- Step 1: Rater Selection -->
+<div class="step" id="step1">
+<div class="card">
+<h2>選擇評分者</h2>
+<p style="margin-bottom:12px;color:#666;">請選擇您是誰：</p>
+<div id="raterSelector" class="selector-grid"></div>
+<div id="managerNote" style="display:none;margin-top:12px;padding:12px;background:#fff8e1;border-radius:8px;border-left:4px solid #f9a825;">
+  <strong>經理主管</strong>：您將評分所有員工（幹部、員工、外勞）
+</div>
+</div>
+<div class="btn-group">
+<button class="btn btn-secondary" onclick="backToEntry()">返回</button>
+<button class="btn btn-primary" id="toStep2" disabled>下一步</button>
+</div>
+</div>
+
+<!-- Step 2: Rating -->
+<div class="step" id="step2">
+<div class="card" id="ratingSection">
+<h2>評分</h2>
+<p style="color:#666;margin-bottom:8px;">
+  評分者：<strong id="displayRater"></strong>
+  <span style="margin-left:20px;color:#999;font-size:.9em;">5分=最佳　1分=最差</span>
+</p>
+
+<div id="cadreRating">
+<h3>一、幹部評分（領導統御、專業技能、團隊精神、經驗傳承、貢獻度）</h3>
+<div style="overflow-x:auto"><table id="cadreTable"><thead><tr><th>姓名</th></tr></thead><tbody></tbody></table></div>
+</div>
+
+<div id="employeeRating">
+<h3>二、員工評分（執行力、互助合作、經驗交流、異常反應、生產配合度）</h3>
+<div style="overflow-x:auto"><table id="employeeTable"><thead><tr><th>姓名</th></tr></thead><tbody></tbody></table></div>
+</div>
+
+<div id="foreignRating">
+<h3>三、外勞評分</h3>
+<div style="overflow-x:auto"><table id="foreignTable"><thead><tr><th>姓名</th><th>評分 (1-5)</th></tr></thead><tbody></tbody></table></div>
+</div>
+
+</div>
+<div class="btn-group">
+<button class="btn btn-secondary" onclick="goToStep(1)">上一頁</button>
+<button class="btn btn-primary" id="toStep3" disabled>下一步</button>
+</div>
+</div>
+
+<!-- Step 3: Confirmation -->
+<div class="step" id="step3">
+<div class="card">
+<h2>確認評分</h2>
+<p>評分者：<strong id="confirmRater"></strong></p>
+<div id="confirmContent"></div>
+<p style="margin-top:16px;color:#c62828;font-weight:700;">送出後會下載評分檔案，請將檔案傳送給管理員。</p>
+</div>
+<div class="btn-group">
+<button class="btn btn-secondary" onclick="goToStep(2)">上一頁</button>
+<button class="btn btn-success" id="submitRatings">確認送出並下載</button>
+</div>
+</div>
+
+<!-- Step 4: Thank you -->
+<div class="step" id="step4">
+<div class="card" style="text-align:center;padding:60px;">
+  <div style="font-size:4em;margin-bottom:16px;">&#9989;</div>
+  <h2 style="color:#2e7d32;">評分已送出！</h2>
+  <p style="color:#666;margin:12px 0;">您的評分檔案已下載，請將此檔案寄給管理員。</p>
+  <p id="raterFileName" style="color:#1a237e;font-weight:700;margin:8px 0;"></p>
+  <div class="btn-group">
+    <button class="btn btn-primary" onclick="backToEntry()">返回首頁</button>
+  </div>
+</div>
+</div>
+
+<!-- Admin results -->
+<div class="step" id="adminResults">
+<div class="card">
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;">
+  <h2 style="border:none;margin:0;padding:0;">管理員評分結果</h2>
+  <div>
+    <button class="btn btn-secondary" onclick="backToEntry()">返回首頁</button>
+    <button class="btn btn-primary" onclick="exportCSV()">匯出 CSV</button>
+  </div>
+</div>
+</div>
+
+<div class="card">
+<h2>匯入評分檔案</h2>
+<p style="color:#666;margin-bottom:8px;">收集員工的評分 JSON 檔案後，在此上傳：</p>
+<div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+  <div style="font-size:2em;margin-bottom:8px;">&#128229;</div>
+  <p><strong>點擊上傳</strong> 或拖曳 JSON 檔案到此處</p>
+  <p style="color:#999;font-size:.85em;">可一次選取多個檔案</p>
+</div>
+<input type="file" id="fileInput" accept=".json" multiple style="display:none" onchange="handleFiles(this.files)">
+<div id="fileList" class="file-list"></div>
+<div class="btn-group" style="margin-top:8px;">
+  <button class="btn btn-danger" onclick="clearImported()">清除所有匯入資料</button>
+</div>
+</div>
+
+<div id="adminResultsArea"></div>
+</div>
+
+</div>
+
+<script>
+// ====== CONFIG ======
+const ADMIN_PASSWORD = 'admin2026';
+const STORAGE_KEY = 'eval202603_admin';
+
+// ====== DATA ======
+const CADRES = ['田重修', '彭群瀞', '林政賢', '徐文材', '許志成', '徐幸良', '鍾國華', '林佑樽'];
+const EMPLOYEES = ['陳濬祐', '彭榮正', '劉鴻福', '愛德恩', '瑞吉', '莊柏廷', '何冠鋐', '賴志炫', '江柏慶'];
+const FOREIGN = ['拉希德', '杰一', '瑞迪', '班吉', '索尼', '阿中', '馬克', '羅力', '杜俊風'];
+const MANAGERS = ['周弘斌', '鍾國祥'];
+const ALL_RATERS = [...CADRES, ...EMPLOYEES, ...MANAGERS];
+const CADRE_CRITERIA = ['領導統御', '專業技能', '團隊精神', '經驗傳承', '貢獻度'];
+const EMPLOYEE_CRITERIA = ['執行力', '互助合作', '經驗交流', '異常反應', '生產配合度'];
+
+// ====== STATE ======
+let currentRater = null;
+let ratings = {};
+
+// ====== NAVIGATION ======
+function backToEntry() {
+  currentRater = null;
+  ratings = {};
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('entryPage').classList.add('active');
+  document.getElementById('progressArea').style.display = 'none';
+}
+
+function enterRaterMode() {
+  currentRater = null;
+  ratings = {};
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step1').classList.add('active');
+  document.getElementById('progressArea').style.display = 'block';
+  updateProgress(1);
+}
+
+function enterAdminMode() {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('adminLogin').classList.add('active');
+  document.getElementById('adminPwd').value = '';
+  document.getElementById('adminError').style.display = 'none';
+}
+
+function adminLogin() {
+  const pwd = document.getElementById('adminPwd').value;
+  if (pwd === ADMIN_PASSWORD) {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById('adminResults').classList.add('active');
+    buildAdminResults();
+  } else {
+    document.getElementById('adminError').style.display = 'block';
+  }
+}
+
+function goToStep(n) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step' + n).classList.add('active');
+  updateProgress(n);
+  if (n === 3) buildConfirmation();
+}
+
+function updateProgress(n) {
+  document.querySelectorAll('.progress-step').forEach(el => {
+    const s = parseInt(el.dataset.step);
+    el.classList.remove('active', 'done');
+    if (s === n) el.classList.add('active');
+    else if (s < n) el.classList.add('done');
+  });
+  document.querySelectorAll('.progress-label span').forEach((el, i) => {
+    el.classList.remove('active', 'done');
+    if (i + 1 === n) el.classList.add('active');
+    else if (i + 1 < n) el.classList.add('done');
+  });
+}
+
+// ====== TOAST ======
+function showToast(msg, type) {
+  const t = document.createElement('div');
+  t.className = 'toast toast-' + (type || 'success');
+  t.textContent = msg;
+  document.getElementById('toast-container').appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+// ====== INIT STEP 1 ======
+const raterSel = document.getElementById('raterSelector');
+const importedBefore = loadAdminData();
+
+ALL_RATERS.forEach(name => {
+  const div = document.createElement('div');
+  div.className = 'selector-item';
+  div.textContent = name;
+  div.dataset.name = name;
+  if (importedBefore[name]) {
+    div.classList.add('submitted-item');
+    div.title = name + ' 的評分已存在';
+  }
+  div.addEventListener('click', () => {
+    if (importedBefore[name]) {
+      showToast(name + ' 的評分已由管理員匯入，無法重複填寫', 'info');
+      return;
+    }
+    document.querySelectorAll('.selector-item').forEach(el => el.classList.remove('selected'));
+    div.classList.add('selected');
+    currentRater = name;
+    document.getElementById('toStep2').disabled = false;
+    document.getElementById('managerNote').style.display = MANAGERS.includes(name) ? 'block' : 'none';
+  });
+  raterSel.appendChild(div);
+});
+
+document.getElementById('toStep2').addEventListener('click', () => {
+  if (!currentRater) return;
+  ratings = {};
+  buildRatingTables();
+  goToStep(2);
+});
+
+// ====== BUILD RATING TABLES ======
+function buildRatingTables() {
+  document.getElementById('displayRater').textContent = currentRater;
+
+  const cadreBody = document.querySelector('#cadreTable tbody');
+  cadreBody.innerHTML = '';
+  const cadreHead = document.querySelector('#cadreTable thead tr');
+  cadreHead.innerHTML = '<th>姓名</th>' + CADRE_CRITERIA.map(c => '<th>' + c + '</th>').join('');
+
+  CADRES.forEach(name => {
+    if (name === currentRater) {
+      const tr = document.createElement('tr');
+      tr.className = 'self-highlight';
+      tr.innerHTML = '<td>' + name + ' <span style="color:#999;font-size:.8em;">(自己)</span></td>' +
+        CADRE_CRITERIA.map(() => '<td class="no-rate">—</td>').join('');
+      cadreBody.appendChild(tr);
+      return;
+    }
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td>' + name + '</td>' +
+      CADRE_CRITERIA.map(c => {
+        const key = 'cadre_' + name + '_' + c;
+        return `<td><div class="rating-group">${[1,2,3,4,5].map(v =>
+          `<button type="button" class="rating-btn" data-key="${key}" data-val="${v}" onclick="setRating('${key}',${v},this)">${v}</button>`
+        ).join('')}</div></td>`;
+      }).join('');
+    cadreBody.appendChild(tr);
+  });
+
+  const empBody = document.querySelector('#employeeTable tbody');
+  empBody.innerHTML = '';
+  const empHead = document.querySelector('#employeeTable thead tr');
+  empHead.innerHTML = '<th>姓名</th>' + EMPLOYEE_CRITERIA.map(c => '<th>' + c + '</th>').join('');
+
+  EMPLOYEES.forEach(name => {
+    if (name === currentRater) {
+      const tr = document.createElement('tr');
+      tr.className = 'self-highlight';
+      tr.innerHTML = '<td>' + name + ' <span style="color:#999;font-size:.8em;">(自己)</span></td>' +
+        EMPLOYEE_CRITERIA.map(() => '<td class="no-rate">—</td>').join('');
+      empBody.appendChild(tr);
+      return;
+    }
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td>' + name + '</td>' +
+      EMPLOYEE_CRITERIA.map(c => {
+        const key = 'emp_' + name + '_' + c;
+        return `<td><div class="rating-group">${[1,2,3,4,5].map(v =>
+          `<button type="button" class="rating-btn" data-key="${key}" data-val="${v}" onclick="setRating('${key}',${v},this)">${v}</button>`
+        ).join('')}</div></td>`;
+      }).join('');
+    empBody.appendChild(tr);
+  });
+
+  const forBody = document.querySelector('#foreignTable tbody');
+  forBody.innerHTML = '';
+  FOREIGN.forEach(name => {
+    const tr = document.createElement('tr');
+    const key = 'for_' + name;
+    tr.innerHTML = '<td>' + name + '</td><td><div class="rating-group">' +
+      [1,2,3,4,5].map(v =>
+        `<button type="button" class="rating-btn" data-key="${key}" data-val="${v}" onclick="setRating('${key}',${v},this)">${v}</button>`
+      ).join('') + '</div></td>';
+    forBody.appendChild(tr);
+  });
+
+  document.getElementById('toStep3').disabled = true;
+}
+
+// ====== RATING ======
+function setRating(key, val, btn) {
+  const parent = btn.parentElement;
+  parent.querySelectorAll('.rating-btn').forEach(b => b.className = 'rating-btn');
+  btn.classList.add('selected-' + val);
+  ratings[key] = val;
+  checkRatingComplete();
+}
+
+function checkRatingComplete() {
+  let total = 0, done = 0;
+  CADRES.forEach(name => {
+    if (name === currentRater) return;
+    CADRE_CRITERIA.forEach(c => { total++; if (ratings['cadre_' + name + '_' + c]) done++; });
+  });
+  EMPLOYEES.forEach(name => {
+    if (name === currentRater) return;
+    EMPLOYEE_CRITERIA.forEach(c => { total++; if (ratings['emp_' + name + '_' + c]) done++; });
+  });
+  FOREIGN.forEach(name => { total++; if (ratings['for_' + name]) done++; });
+  document.getElementById('toStep3').disabled = (done !== total);
+}
+
+// ====== CONFIRMATION ======
+function buildConfirmation() {
+  document.getElementById('confirmRater').textContent = currentRater;
+  const area = document.getElementById('confirmContent');
+  let html = '';
+
+  html += '<div class="summary-card"><h3>幹部評分</h3><table><tr><th>姓名</th>' + CADRE_CRITERIA.map(c => '<th>' + c + '</th>').join('') + '<th>總分</th></tr>';
+  CADRES.forEach(name => {
+    if (name === currentRater) {
+      html += '<tr class="self-highlight"><td>' + name + '</td><td colspan="6" class="no-rate">不評分自己</td></tr>';
+      return;
+    }
+    const scores = CADRE_CRITERIA.map(c => ratings['cadre_' + name + '_' + c] || 0);
+    const total = scores.reduce((a,b) => a + b, 0);
+    html += '<tr><td>' + name + '</td>' + scores.map(s => '<td>' + (s || '—') + '</td>').join('') + '<td><strong>' + total + '</strong></td></tr>';
+  });
+  html += '</table></div>';
+
+  html += '<div class="summary-card"><h3>員工評分</h3><table><tr><th>姓名</th>' + EMPLOYEE_CRITERIA.map(c => '<th>' + c + '</th>').join('') + '<th>總分</th></tr>';
+  EMPLOYEES.forEach(name => {
+    if (name === currentRater) {
+      html += '<tr class="self-highlight"><td>' + name + '</td><td colspan="6" class="no-rate">不評分自己</td></tr>';
+      return;
+    }
+    const scores = EMPLOYEE_CRITERIA.map(c => ratings['emp_' + name + '_' + c] || 0);
+    const total = scores.reduce((a,b) => a + b, 0);
+    html += '<tr><td>' + name + '</td>' + scores.map(s => '<td>' + (s || '—') + '</td>').join('') + '<td><strong>' + total + '</strong></td></tr>';
+  });
+  html += '</table></div>';
+
+  html += '<div class="summary-card"><h3>外勞評分</h3><table><tr><th>姓名</th><th>評分</th></tr>';
+  FOREIGN.forEach(name => {
+    const s = ratings['for_' + name] || 0;
+    html += '<tr><td>' + name + '</td><td>' + (s || '—') + '</td></tr>';
+  });
+  html += '</table></div>';
+
+  area.innerHTML = html;
+}
+
+// ====== SUBMIT (download JSON) ======
+document.getElementById('submitRatings').addEventListener('click', () => {
+  if (!currentRater) return;
+  const data = {
+    rater: currentRater,
+    submittedAt: new Date().toISOString(),
+    ratings: { ...ratings }
+  };
+  const jsonStr = JSON.stringify(data, null, 2);
+  const blob = new Blob([jsonStr], { type: 'application/json' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  const filename = '互評_' + currentRater + '_' + new Date().toISOString().slice(0,10) + '.json';
+  link.download = filename;
+  link.click();
+
+  document.getElementById('raterFileName').textContent = filename;
+  document.getElementById('step3').classList.remove('active');
+  document.getElementById('step4').classList.add('active');
+  updateProgress(3);
+
+  document.querySelector(`.selector-item[data-name="${currentRater}"]`).classList.add('submitted-item');
+  document.querySelector(`.selector-item[data-name="${currentRater}"]`).title = '已送出評分';
+  showToast('評分已下載！請將檔案傳給管理員');
+});
+
+// ====== ADMIN DATA (IndexedDB via localStorage) ======
+function loadAdminData() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+  catch(e) { return {}; }
+}
+
+function saveAdminData(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function clearImported() {
+  if (!confirm('確定清除所有匯入的評分資料？')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  document.getElementById('fileList').innerHTML = '';
+  buildAdminResults();
+  showToast('已清除所有資料');
+}
+
+function handleFiles(files) {
+  Array.from(files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (!data.rater || !data.ratings) {
+          showToast(file.name + ' 格式不正確', 'error');
+          return;
+        }
+        const stored = loadAdminData();
+        stored[data.rater] = data;
+        stored[data.rater]._importedAt = new Date().toISOString();
+        saveAdminData(stored);
+        showToast('已匯入 ' + data.rater + ' 的評分');
+        buildAdminResults();
+        updateFileList();
+      } catch(err) {
+        showToast(file.name + ' 解析失敗：' + err.message, 'error');
+      }
+    };
+    reader.readAsText(file);
+  });
+  document.getElementById('fileInput').value = '';
+}
+
+function updateFileList() {
+  const data = loadAdminData();
+  const list = document.getElementById('fileList');
+  const names = Object.keys(data).filter(k => k !== '_importedAt');
+  if (names.length === 0) {
+    list.innerHTML = '';
+    return;
+  }
+  list.innerHTML = '<p style="font-weight:700;margin-bottom:8px;">已匯入評分：</p>';
+  names.forEach(name => {
+    const div = document.createElement('div');
+    div.className = 'file-item';
+    const time = data[name]._importedAt ? new Date(data[name]._importedAt).toLocaleString('zh-TW') : '';
+    div.innerHTML = '<span>' + name + ' <span style="color:#999;font-size:.85em;">' + time + '</span></span>' +
+      '<span style="color:#2e7d32;font-weight:700;">已匯入</span>';
+    list.appendChild(div);
+  });
+}
+
+// ====== ADMIN RESULTS ======
+function buildAdminResults() {
+  const all = loadAdminData();
+  updateFileList();
+  const area = document.getElementById('adminResultsArea');
+  const raterCount = Object.keys(all).length;
+  let html = '';
+
+  html += '<div class="card"><h2>完成進度</h2><div style="display:flex;flex-wrap:wrap;gap:6px;">';
+  ALL_RATERS.forEach(name => {
+    if (all[name]) {
+      const t = all[name].submittedAt ? new Date(all[name].submittedAt).toLocaleString('zh-TW') : '';
+      html += `<span class="summary-stat" style="background:#e8f5e9;padding:4px 12px;border-radius:4px;"><strong>${name}</strong> ✅ ${t}</span>`;
+    } else {
+      html += `<span class="summary-stat" style="background:#fce4ec;padding:4px 12px;border-radius:4px;"><strong>${name}</strong> ⏳ 未評</span>`;
+    }
+  });
+  html += `</div><p style="margin-top:12px;"><strong>已評：${raterCount}/${ALL_RATERS.length}</strong></p></div>`;
+
+  if (raterCount > 0) {
+    html += '<div class="card"><h2>幹部評分排名</h2>' + buildRankingTable(CADRES, CADRE_CRITERIA, all, 'cadre') + '</div>';
+    html += '<div class="card"><h2>員工評分排名</h2>' + buildRankingTable(EMPLOYEES, EMPLOYEE_CRITERIA, all, 'emp') + '</div>';
+
+    html += '<div class="card"><h2>外勞評分排名</h2>';
+    let forScores = {};
+    FOREIGN.forEach(name => { forScores[name] = []; });
+    Object.values(all).forEach(d => {
+      if (!d.ratings) return;
+      FOREIGN.forEach(name => {
+        if (d.ratings['for_' + name]) forScores[name].push(d.ratings['for_' + name]);
+      });
+    });
+    html += '<table><tr><th>排名</th><th>姓名</th><th>總分</th><th>平均分</th><th>評分人數</th></tr>';
+    const forRank = FOREIGN.map(name => ({
+      name,
+      total: forScores[name].reduce((a,b) => a + b, 0),
+      avg: forScores[name].length ? (forScores[name].reduce((a,b) => a + b, 0) / forScores[name].length) : 0,
+      count: forScores[name].length
+    })).sort((a,b) => b.total - a.total);
+    forRank.forEach((p, i) => {
+      html += `<tr><td>${i + 1}</td><td>${p.name}</td><td><strong>${p.total}</strong></td><td>${p.avg.toFixed(1)}</td><td>${p.count}</td></tr>`;
+    });
+    html += '</table></div>';
+  }
+
+  area.innerHTML = html;
+}
+
+function buildRankingTable(persons, criteria, allData, prefix) {
+  let scores = {};
+  persons.forEach(name => {
+    scores[name] = { total: 0, count: 0, criteria: {} };
+    criteria.forEach(c => { scores[name].criteria[c] = 0; });
+  });
+
+  Object.values(allData).forEach(d => {
+    if (!d.ratings) return;
+    persons.forEach(name => {
+      let total = 0, hasAny = false;
+      criteria.forEach(c => {
+        const key = prefix + '_' + name + '_' + c;
+        if (d.ratings[key]) {
+          scores[name].criteria[c] += d.ratings[key];
+          total += d.ratings[key];
+          hasAny = true;
+        }
+      });
+      if (hasAny) { scores[name].total += total; scores[name].count++; }
+    });
+  });
+
+  const ranked = persons.filter(p => scores[p].count > 0).map(name => ({
+    name,
+    total: scores[name].total,
+    count: scores[name].count,
+    criteria: scores[name].criteria
+  })).sort((a,b) => b.total - a.total);
+
+  let html = '<table><tr><th>排名</th><th>姓名</th>';
+  criteria.forEach(c => html += '<th>' + c + '</th>');
+  html += '<th>總分</th><th>評分人數</th></tr>';
+  ranked.forEach((p, i) => {
+    html += `<tr><td>${i + 1}</td><td>${p.name}</td>`;
+    criteria.forEach(c => html += '<td>' + (p.criteria[c] || 0) + '</td>');
+    html += `<td><strong>${p.total}</strong></td><td>${p.count}</td></tr>`;
+  });
+  html += '</table>';
+  return html;
+}
+
+// ====== EXPORT CSV ======
+function exportCSV() {
+  const all = loadAdminData();
+  const keys = Object.keys(all);
+  if (keys.length === 0) { showToast('尚無評分資料', 'error'); return; }
+
+  let csv = '\uFEFF';
+  csv += '類別,姓名,評分項目,';
+  ALL_RATERS.forEach(r => csv += r + ',');
+  csv = csv.slice(0, -1) + '\n';
+
+  function addRow(cat, name, item, scores) {
+    csv += cat + ',' + name + ',' + item + ',';
+    ALL_RATERS.forEach(r => csv += (scores[r] || '') + ',');
+    csv = csv.slice(0, -1) + '\n';
+  }
+
+  CADRES.forEach(name => {
+    CADRE_CRITERIA.forEach(c => {
+      let scores = {};
+      ALL_RATERS.forEach(r => {
+        if (all[r] && all[r].ratings) scores[r] = all[r].ratings['cadre_' + name + '_' + c] || '';
+      });
+      addRow('幹部', name, c, scores);
+    });
+  });
+
+  EMPLOYEES.forEach(name => {
+    EMPLOYEE_CRITERIA.forEach(c => {
+      let scores = {};
+      ALL_RATERS.forEach(r => {
+        if (all[r] && all[r].ratings) scores[r] = all[r].ratings['emp_' + name + '_' + c] || '';
+      });
+      addRow('員工', name, c, scores);
+    });
+  });
+
+  FOREIGN.forEach(name => {
+    let scores = {};
+    ALL_RATERS.forEach(r => {
+      if (all[r] && all[r].ratings) scores[r] = all[r].ratings['for_' + name] || '';
+    });
+    addRow('外勞', name, '整體評分', scores);
+  });
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = '2026年3月員工互評_' + new Date().toISOString().slice(0,10) + '.csv';
+  link.click();
+  showToast('CSV 匯出成功');
+}
+
+// ====== DRAG & DROP ======
+const uploadArea = document.getElementById('uploadArea');
+uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+uploadArea.addEventListener('dragleave', () => { uploadArea.classList.remove('dragover'); });
+uploadArea.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadArea.classList.remove('dragover');
+  if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+});
+
+// ====== INIT ======
+if (Object.keys(loadAdminData()).length > 0) buildAdminResults();
+</script>
+</body>
+</html>
