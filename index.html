@@ -386,6 +386,11 @@ document.getElementById('toStep2').addEventListener('click', () => {
   goToStep(2);
 });
 
+document.getElementById('toStep3').addEventListener('click', () => {
+  if (!currentRater) return;
+  goToStep(3);
+});
+
 // ====== BUILD RATING TABLES ======
 function buildRatingTables() {
   document.getElementById('displayRater').textContent = currentRater;
