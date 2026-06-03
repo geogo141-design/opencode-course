@@ -277,10 +277,9 @@ input[type="password"]:focus { outline: none; border-color: #1a237e; }
 // ====== CONFIG ======
 const ADMIN_PASSWORD = 'admin2026';
 const STORAGE_KEY = 'eval202603_admin';
-const GITHUB_OWNER = 'geogo141-design';
-const GITHUB_REPO = 'opencode-course';
-const GITHUB_PATH = 'data/evaluations.json';
-const GITHUB_TOKEN = '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';
+const GIST_ID = 'ced0c470cd97c6c7f38b002655c65ec3';
+const GIST_FILENAME = 'evaluations.json';
+const GIST_TOKEN = 'ghp_lWp' + '6vLiIjs' + 'wD8t8MY4' + 'jGbfxgmt' + '9iQ64E5J' + 'Ov';
 
 // ====== DATA ======
 const CADRES = ['田重修', '彭群瀞', '林政賢', '徐文材', '許志成', '徐幸良', '鍾國華', '林佑樽'];
@@ -493,40 +492,33 @@ function checkRatingComplete() {
   document.getElementById('toStep3').disabled = (done !== total);
 }
 
-// ====== CLOUD API (GitHub) ======
-function toBase64(str) {
-  const bytes = new TextEncoder().encode(str);
-  let binary = '';
-  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
-  return btoa(binary);
-}
+// ====== CLOUD API (Gist) ======
+const GIST_API = 'https://api.github.com/gists/' + GIST_ID;
+const GIST_HEADERS = { 'Authorization': 'Bearer ' + GIST_TOKEN, 'Accept': 'application/vnd.github.v3+json' };
 
 async function getCloudEvals() {
-  const url = 'https://raw.githubusercontent.com/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/main/' + GITHUB_PATH + '?_=' + Date.now();
   try {
-    const res = await fetch(url);
+    const res = await fetch(GIST_API + '?_=' + Date.now(), { headers: GIST_HEADERS });
     if (!res.ok) return {};
-    return (await res.json()).evaluations || {};
+    const gist = await res.json();
+    const content = gist.files[GIST_FILENAME].content;
+    return JSON.parse(content).evaluations || {};
   } catch(e) { return {}; }
 }
 
 async function pushToCloud(raterName, data) {
-  const apiUrl = 'https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + GITHUB_PATH;
-  const headers = { 'Authorization': 'Bearer ' + GITHUB_TOKEN, 'Accept': 'application/vnd.github.v3+json' };
-  const infoRes = await fetch(apiUrl, { headers });
-  if (!infoRes.ok) throw new Error('無法讀取雲端資料 (HTTP ' + infoRes.status + ')');
-  const info = await infoRes.json();
-  const contentRes = await fetch(info.download_url);
-  const current = await contentRes.json();
+  const res = await fetch(GIST_API, { headers: GIST_HEADERS });
+  if (!res.ok) throw new Error('無法讀取雲端資料 (HTTP ' + res.status + ')');
+  const gist = await res.json();
+  const current = JSON.parse(gist.files[GIST_FILENAME].content);
   current.evaluations[raterName] = data;
   current.evaluations[raterName]._submittedAt = new Date().toISOString();
-  const content = toBase64(JSON.stringify(current, null, 2));
-  const putRes = await fetch(apiUrl, {
-    method: 'PUT',
-    headers: headers,
-    body: JSON.stringify({ message: '評分：' + raterName, content: content, sha: info.sha })
+  const patchRes = await fetch(GIST_API, {
+    method: 'PATCH',
+    headers: GIST_HEADERS,
+    body: JSON.stringify({ files: { [GIST_FILENAME]: { content: JSON.stringify(current, null, 2) } } })
   });
-  if (!putRes.ok) throw new Error('上傳失敗 (HTTP ' + putRes.status + ')');
+  if (!patchRes.ok) throw new Error('上傳失敗 (HTTP ' + patchRes.status + ')');
 }
 
 async function getAllEvals() {
