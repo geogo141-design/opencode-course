@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="utf-8">
+  <title>Ollama 本地 AI 測試</title>
+</head>
+<body>
+  <h1>Ollama 本地 AI 測試</h1>
+  <input type="text" id="prompt" placeholder="輸入問題..." style="width:300px">
+  <button onclick="askAI()">送出</button>
+  <pre id="response"></pre>
+  <script>
+    async function askAI() {
+      const prompt = document.getElementById('prompt').value;
+      const res = document.getElementById('response');
+      res.textContent = '思考中...';
+      try {
+        const r = await fetch('http://localhost:11434/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ model: 'gemma4:e4b', prompt, stream: false })
+        });
+        const data = await r.json();
+        res.textContent = data.response;
+      } catch (e) {
+        res.textContent = '錯誤：' + e.message;
+      }
+    }
+  </script>
+</body>
+</html>
