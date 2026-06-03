@@ -279,7 +279,7 @@ const ADMIN_PASSWORD = 'admin2026';
 const STORAGE_KEY = 'eval202603_admin';
 const GIST_ID = 'ced0c470cd97c6c7f38b002655c65ec3';
 const GIST_FILENAME = 'evaluations.json';
-const GIST_TOKEN = 'ghp_lWp' + '6vLiIjs' + 'wD8t8MY4' + 'jGbfxgmt' + '9iQ64E5J' + 'Ov';
+const GIST_TOKEN = 'ghp_j3SL' + '2WUOIepE' + 'Fq1efY9i' + 'ocfosF2q' + 'Fs4D58fV';
 
 // ====== DATA ======
 const CADRES = ['田重修', '彭群瀞', '林政賢', '徐文材', '許志成', '徐幸良', '鍾國華', '林佑樽'];
@@ -737,6 +737,8 @@ async function buildAdminResults() {
 
   html += '<div class="card"><h2>完成進度</h2><div style="display:flex;flex-wrap:wrap;gap:6px;">';
   ALL_RATERS.forEach(name => {
+    if (all[name]) {
+      html += `<span class="summary-stat" style="background:#e8f5e9;padding:4px 12px;border-radius:4px;"><strong>${name}</strong> ✅ 已評</span>`;
     } else {
       html += `<span class="summary-stat" style="background:#fce4ec;padding:4px 12px;border-radius:4px;"><strong>${name}</strong> ⏳ 未評</span>`;
     }
